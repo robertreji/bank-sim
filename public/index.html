@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apex Bank Simulator</title>
+    <meta name="theme-color" content="#0a0813" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/index.css" />
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-one"></div>
+    <div class="bg-orb bg-orb-two"></div>
+    <div class="bg-grid"></div>
+
+    <main class="app-shell">
+      <section class="hero-panel glass">
+        <div>
+          <p class="eyebrow">Standalone bank simulator</p>
+          <h1>Apex Bank</h1>
+          <p class="hero-copy">
+            Premium local banking UI for account setup, seeded balances, transfers, transaction monitoring, and webhook
+            tracking on port 8092.
+          </p>
+        </div>
+        <div class="hero-status">
+          <div class="status-pill" id="server-status">Server ready</div>
+          <div class="muted">Same-origin UI served from the bank-sim server</div>
+        </div>
+      </section>
+
+      <section class="auth-grid" id="auth-view">
+        <article class="glass auth-card auth-card-primary">
+          <div class="card-heading">
+            <p class="eyebrow">Get started</p>
+            <h2>Register or sign in</h2>
+          </div>
+
+          <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+            <button class="tab-button active" data-mode="register" type="button">Register</button>
+            <button class="tab-button" data-mode="login" type="button">Login</button>
+          </div>
+
+          <form class="stack form-section" id="register-form">
+            <label class="field">
+              <span>Account ID</span>
+              <input name="accountId" id="register-account-id" placeholder="ACC_USER_001" required />
+            </label>
+            <label class="field">
+              <span>Display name</span>
+              <input name="name" id="register-name" placeholder="Apex User" required />
+            </label>
+            <div class="two-up">
+              <label class="field">
+                <span>Password</span>
+                <input name="password" id="register-password" type="password" placeholder="••••••••" />
+              </label>
+              <label class="field">
+                <span>Initial balance</span>
+                <input name="initialBalance" id="register-initial-balance" type="number" min="0" step="0.01" value="0" />
+              </label>
+            </div>
+            <label class="field">
+              <span>Currency</span>
+              <select name="currency" id="register-currency">
+                <option value="USD">USD</option>
+              </select>
+            </label>
+            <button class="button primary" type="submit">Create account</button>
+          </form>
+
+          <form class="stack form-section hidden" id="login-form">
+            <label class="field">
+              <span>Account ID</span>
+              <input name="accountId" id="login-account-id" placeholder="ACC_ANCHOR" required />
+            </label>
+            <label class="field">
+              <span>Password</span>
+              <input name="password" id="login-password" type="password" placeholder="Optional for anchor" />
+            </label>
+            <div class="button-row">
+              <button class="button primary" type="submit">Open dashboard</button>
+              <button class="button secondary" id="quick-anchor-login" type="button">Quick open anchor</button>
+            </div>
+          </form>
+
+          <div class="auth-feedback" id="auth-message" aria-live="polite"></div>
+        </article>
+
+        <article class="glass auth-card auth-card-secondary">
+          <p class="eyebrow">What this UI handles</p>
+          <div class="feature-list">
+            <div class="feature-item">
+              <span class="feature-dot"></span>
+              Seed or faucet any account instantly.
+            </div>
+            <div class="feature-item">
+              <span class="feature-dot"></span>
+              Create transfers with a deterministic idempotency key.
+            </div>
+            <div class="feature-item">
+              <span class="feature-dot"></span>
+              Track completed and failed webhook deliveries.
+            </div>
+            <div class="feature-item">
+              <span class="feature-dot"></span>
+              Use the same interface on desktop and mobile host IPs.
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="dashboard hidden" id="dashboard-view">
+        <header class="dashboard-header glass">
+          <div>
+            <p class="eyebrow">Dashboard</p>
+            <h2 id="account-name">Account</h2>
+            <p class="muted" id="account-meta"></p>
+          </div>
+          <div class="header-actions">
+            <button class="button secondary" id="refresh-button" type="button">Refresh</button>
+            <button class="button ghost" id="logout-button" type="button">Sign out</button>
+          </div>
+        </header>
+
+        <section class="balance-grid">
+          <article class="glass balance-card card-large">
+            <div class="card-heading card-heading-split">
+              <div>
+                <p class="eyebrow">Available balance</p>
+                <h3 id="balance-amount">$0.00</h3>
+              </div>
+              <div class="currency-badge" id="currency-badge">USD</div>
+            </div>
+            <div class="account-card">
+              <div class="account-chip">Apex Bank</div>
+              <div class="account-number" id="account-id-display">ACC</div>
+              <div class="account-owner" id="account-owner-display"></div>
+            </div>
+            <div class="balance-stats">
+              <div>
+                <span class="stat-label">Status</span>
+                <strong id="balance-status">Synchronized</strong>
+              </div>
+              <div>
+                <span class="stat-label">Last refresh</span>
+                <strong id="last-refresh">--</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="glass action-card">
+            <div class="card-heading">
+              <p class="eyebrow">Quick action</p>
+              <h3>Seed funds</h3>
+            </div>
+            <form class="stack" id="seed-form">
+              <label class="field">
+                <span>Amount</span>
+                <input name="seedAmount" id="seed-amount" type="number" min="0" step="0.01" value="1000" />
+              </label>
+              <button class="button primary" type="submit">Seed account</button>
+            </form>
+          </article>
+
+          <article class="glass action-card">
+            <div class="card-heading">
+              <p class="eyebrow">Move money</p>
+              <h3>Transfer funds</h3>
+            </div>
+            <form class="stack" id="transfer-form">
+              <label class="field">
+                <span>Recipient account</span>
+                <input name="toAccount" id="transfer-to" placeholder="ACC_ANCHOR" required />
+              </label>
+              <div class="two-up">
+                <label class="field">
+                  <span>Amount</span>
+                  <input name="transferAmount" id="transfer-amount" type="number" min="0" step="0.01" required />
+                </label>
+                <label class="field">
+                  <span>Reference ID</span>
+                  <input name="referenceId" id="transfer-reference" placeholder="deposit-001" />
+                </label>
+              </div>
+              <button class="button primary" type="submit">Send transfer</button>
+            </form>
+          </article>
+        </section>
+
+        <section class="glass mobile-card">
+          <div class="mobile-copy">
+            <div class="card-heading">
+              <p class="eyebrow">Mobile access</p>
+              <h3>Scan this dashboard on your phone</h3>
+            </div>
+            <p class="muted" id="mobile-url">Current dashboard URL</p>
+            <div class="button-row mobile-actions">
+              <button class="button secondary" id="copy-url-button" type="button">Copy link</button>
+              <button class="button ghost" id="refresh-qr-button" type="button">Refresh QR</button>
+            </div>
+          </div>
+          <div class="qr-frame" aria-label="Dashboard QR code">
+            <img id="dashboard-qr" alt="QR code for the current dashboard URL" />
+          </div>
+        </section>
+
+        <section class="data-grid">
+          <article class="glass panel-card">
+            <div class="card-heading card-heading-split">
+              <div>
+                <p class="eyebrow">Transactions</p>
+                <h3>Recent activity</h3>
+              </div>
+              <span class="status-pill subtle" id="transaction-count">0 items</span>
+            </div>
+            <div class="activity-list" id="transactions-list"></div>
+          </article>
+
+          <article class="glass panel-card">
+            <div class="card-heading card-heading-split">
+              <div>
+                <p class="eyebrow">Webhooks</p>
+                <h3>Delivery trail</h3>
+              </div>
+              <span class="status-pill subtle" id="webhook-count">0 items</span>
+            </div>
+            <div class="activity-list" id="webhooks-list"></div>
+          </article>
+        </section>
+
+        <div class="toast hidden" id="app-toast" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <template id="transaction-template">
+      <article class="activity-item">
+        <div>
+          <strong class="activity-title"></strong>
+          <p class="activity-subtitle"></p>
+        </div>
+        <div class="activity-meta"></div>
+      </article>
+    </template>
+
+    <template id="webhook-template">
+      <article class="activity-item webhook-item">
+        <div>
+          <strong class="activity-title"></strong>
+          <p class="activity-subtitle"></p>
+        </div>
+        <div class="activity-meta"></div>
+      </article>
+    </template>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
