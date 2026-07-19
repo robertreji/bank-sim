@@ -4,33 +4,33 @@
    CSS Variables / Design Tokens
    ============================ */
 :root {
-  --bg-primary: #0a0e27;
-  --bg-secondary: #0f1335;
-  --bg-card: #161b40;
-  --bg-card-hover: #1c2252;
-  --bg-glass: rgba(22, 27, 64, 0.65);
-  --bg-glass-strong: rgba(22, 27, 64, 0.85);
+  --bg-primary: #F8F6F1;
+  --bg-secondary: #FAF8F4;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F0EDE4;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-glass-strong: rgba(248, 246, 241, 0.9);
 
-  --gradient-primary: linear-gradient(135deg, #6c2bd9, #9333ea, #7c3aed);
-  --gradient-accent: linear-gradient(135deg, #a855f7, #6366f1);
-  --gradient-card: linear-gradient(135deg, #2d1b69 0%, #1a1145 40%, #0f1335 100%);
-  --gradient-warm: linear-gradient(135deg, #6c2bd9 0%, #ec4899 100%);
-  --gradient-glow: linear-gradient(135deg, #a855f7, #06b6d4);
+  --gradient-primary: linear-gradient(135deg, #164A3A 0%, #1E5645 50%, #113C2F 100%);
+  --gradient-accent: linear-gradient(135deg, #164A3A, #C9A34E);
+  --gradient-card: linear-gradient(135deg, #164A3A 0%, #1E5645 40%, #113C2F 100%);
+  --gradient-warm: linear-gradient(135deg, #164A3A 0%, #C9A34E 100%);
+  --gradient-glow: linear-gradient(135deg, #164A3A, #C9A34E);
 
-  --text-primary: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #164A3A;
+  --text-secondary: #4E6B4A;
+  --text-muted: #8A9886;
 
-  --accent-purple: #a855f7;
-  --accent-cyan: #06b6d4;
-  --accent-pink: #ec4899;
+  --accent-purple: #164A3A;
+  --accent-cyan: #C9A34E;
+  --accent-pink: #D9534F;
 
-  --success: #22c55e;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  --success: #164A3A;
+  --error: #D9534F;
+  --warning: #C9A34E;
 
-  --border-subtle: rgba(148, 163, 184, 0.1);
-  --border-glow: rgba(168, 85, 247, 0.3);
+  --border-subtle: rgba(22, 74, 58, 0.08);
+  --border-glow: rgba(22, 74, 58, 0.2);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -83,9 +83,9 @@ body::before {
   width: 200%;
   height: 200%;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(108, 43, 217, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(22, 74, 58, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(201, 163, 78, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(78, 107, 74, 0.04) 0%, transparent 50%);
   animation: bgShift 20s ease-in-out infinite alternate;
   z-index: -1;
   pointer-events: none;
@@ -1970,8 +1970,8 @@ input[type="number"] {
 .mobile-app-container {
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(circle at top right, #0f172a, #020617);
-  color: #fff;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -1981,7 +1981,7 @@ input[type="number"] {
 
 .mobile-header {
   padding: 40px 24px 24px;
-  background: linear-gradient(180deg, rgba(15,23,42,0.8) 0%, transparent 100%);
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1997,7 +1997,7 @@ input[type="number"] {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a855f7, #3b82f6);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2008,13 +2008,13 @@ input[type="number"] {
 
 .mobile-greeting {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .mobile-name {
   font-size: 18px;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .mobile-balance-section {
@@ -2023,7 +2023,7 @@ input[type="number"] {
 
 .mobile-balance-label {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
@@ -2031,16 +2031,18 @@ input[type="number"] {
   font-size: 42px;
   font-weight: 700;
   letter-spacing: -1px;
+  color: var(--text-primary);
 }
 
 .mobile-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 24px;
   padding: 24px;
   margin: 0 24px 24px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(22, 74, 58, 0.02);
 }
 
 .bottom-nav-bar {
@@ -2049,10 +2051,10 @@ input[type="number"] {
   left: 0;
   right: 0;
   height: 80px;
-  background: rgba(15, 23, 42, 0.7);
+  background: var(--bg-glass-strong);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -2067,7 +2069,7 @@ input[type="number"] {
   gap: 6px;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2076,7 +2078,7 @@ input[type="number"] {
 }
 
 .bottom-nav-item.active {
-  color: #3b82f6;
+  color: var(--accent-cyan);
 }
 
 .bottom-nav-icon {

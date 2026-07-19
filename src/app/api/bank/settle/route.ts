@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const transaction = txData.transaction || txData;
     const asset =
       transaction.amount_expected?.asset ||
-      "stellar:USDC:GDCD2HWDLUMQN37V7PMVIMPMT5MD5YPW3P6WPLCVBHQ4F25B2PJOCCB7";
+      "stellar:USDC:GAJ553PWUPQDOJBP33JKEHXJXCGT5QTU7U245Y243MMQUA4QBQIJ55ND";
 
     if (kind === "deposit") {
       // 2. Call Anchor Service to transition Platform status to pending_user_transfer_start

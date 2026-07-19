@@ -22,6 +22,15 @@ function InteractivePortalContent() {
   const [bankBalance, setBankBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"action" | "history">("action");
+  const [upiId, setUpiId] = useState("");
+
+  useEffect(() => {
+    if (loggedInAccount) {
+      setUpiId(`${loggedInAccount.accountId}@stellarbank`);
+    } else {
+      setUpiId("");
+    }
+  }, [loggedInAccount?.accountId]);
   
   const [isScanning, setIsScanning] = useState(false);
 
@@ -228,13 +237,21 @@ function InteractivePortalContent() {
     setStatus("loading");
     setErrorMsg("");
     try {
+      let targetAccountId = loggedInAccount.accountId;
+      if (kind === "withdrawal" && upiId) {
+        const parts = upiId.split("@");
+        if (parts.length > 0 && parts[0].trim()) {
+          targetAccountId = parts[0].trim().toLowerCase();
+        }
+      }
+
       const settleRes = await fetch("/api/bank/settle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transactionId: transactionId,
           token: "dummy-token-not-needed",
-          accountId: loggedInAccount.accountId,
+          accountId: targetAccountId,
           amount: amount,
           kind: kind,
         }),
@@ -310,6 +327,7 @@ function InteractivePortalContent() {
                   value={accountId}
                   onChange={(e) => setAccountId(e.target.value)}
                   required
+                  className="form-input"
                 />
               </div>
               <div className="form-group">
@@ -320,6 +338,7 @@ function InteractivePortalContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="form-input"
                 />
               </div>
               <div className="form-group">
@@ -330,6 +349,7 @@ function InteractivePortalContent() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  className="form-input"
                 />
               </div>
               <div className="form-group">
@@ -340,6 +360,7 @@ function InteractivePortalContent() {
                   value={initialBalance}
                   onChange={(e) => setInitialBalance(e.target.value)}
                   required
+                  className="form-input"
                 />
               </div>
               <button type="submit" className="btn btn-primary btn-full" disabled={status === "loading"}>
@@ -362,6 +383,7 @@ function InteractivePortalContent() {
                   value={accountId}
                   onChange={(e) => setAccountId(e.target.value)}
                   required
+                  className="form-input"
                 />
               </div>
               <div className="form-group">
@@ -372,6 +394,7 @@ function InteractivePortalContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="form-input"
                 />
               </div>
               <button type="submit" className="btn btn-primary btn-full" disabled={status === "loading"}>
@@ -408,9 +431,9 @@ function InteractivePortalContent() {
           left: 0,
           right: 0,
           zIndex: 100,
-          background: "rgba(15, 23, 42, 0.85)",
+          background: "var(--bg-glass-strong)",
           backdropFilter: "blur(12px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          borderBottom: "1px solid var(--border-subtle)",
           padding: "16px 20px",
           display: "flex",
           justifyContent: "space-between",
@@ -420,11 +443,11 @@ function InteractivePortalContent() {
         <button 
           onClick={handleGoHome}
           style={{
-            background: "rgba(255, 255, 255, 0.08)",
+            background: "rgba(22, 74, 58, 0.06)",
             border: "none",
             borderRadius: "12px",
             padding: "8px 16px",
-            color: "#fff",
+            color: "var(--text-primary)",
             fontSize: "14px",
             fontWeight: "600",
             cursor: "pointer",
@@ -437,12 +460,12 @@ function InteractivePortalContent() {
         >
           <span>🏠</span> Home
         </button>
-        <span style={{ fontWeight: "700", fontSize: "16px", color: "#f8fafc", letterSpacing: "0.5px" }}>🏦 StellarBank</span>
+        <span style={{ fontWeight: "700", fontSize: "16px", color: "var(--text-primary)", letterSpacing: "0.5px" }}>🏦 StellarBank</span>
         <button 
           onClick={handleLogout} 
           style={{ 
-            background: "rgba(239, 68, 68, 0.15)", 
-            color: "#ef4444",
+            background: "rgba(217, 83, 79, 0.12)", 
+            color: "var(--error)",
             padding: "8px 14px", 
             borderRadius: "12px", 
             fontSize: "12px", 
@@ -504,11 +527,46 @@ function InteractivePortalContent() {
             </div>
           </div>
 
-          <div className="mobile-balance-section">
-            <div className="mobile-balance-label">Available Balance</div>
-            <div className="mobile-balance-amount">${bankBalance.toFixed(2)}</div>
-            <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
-              Account: {loggedInAccount.accountId}
+          <div className="mobile-balance-section" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginTop: "16px", marginBottom: "8px" }}>
+            <div className="mobile-balance-label" style={{ color: "var(--text-secondary)", fontSize: "14px", fontWeight: "600" }}>Available Balance</div>
+            <div className="mobile-balance-amount" style={{ color: "var(--text-primary)", fontSize: "40px", fontWeight: "800", margin: "4px 0" }}>${bankBalance.toFixed(2)}</div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px", width: "100%", alignItems: "center" }}>
+              <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                Account: <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{loggedInAccount.accountId}</span>
+              </div>
+              
+              {/* Copy UPI Button */}
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(`${loggedInAccount.accountId}@stellarbank`);
+                  alert(`Copied UPI ID: ${loggedInAccount.accountId}@stellarbank`);
+                }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "var(--text-primary)",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-subtle)",
+                  padding: "6px 14px",
+                  borderRadius: "20px",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(22, 74, 58, 0.04)",
+                  transition: "all 0.2s"
+                }}
+                className="hover:scale-[1.02] active:scale-[0.98]"
+                title="Click to copy UPI ID"
+              >
+                <span>🔑 UPI ID:</span>
+                <span style={{ fontFamily: "monospace", fontSize: "12.5px" }}>{loggedInAccount.accountId}@stellarbank</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "2px" }}>
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -522,11 +580,49 @@ function InteractivePortalContent() {
             <div className="mobile-card">
               {status === "ready" ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <div className="bank-logo-icon" style={{ margin: "0 auto 16px", background: "var(--gradient-accent)" }}>🏦</div>
-                  <h3 style={{ marginBottom: "16px", fontSize: "22px", color: "#fff" }}>Authorize {kind === "deposit" ? "Deposit" : "Withdrawal"}</h3>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "16px", marginBottom: "32px" }}>
-                    You are about to authorize a {kind} of <strong style={{ color: "#fff", fontSize: "24px", display: "block", marginTop: "12px" }}>${amount} USD</strong>
+                  <div 
+                    className="bank-logo-icon" 
+                    style={{ 
+                      margin: "0 auto 16px", 
+                      background: "var(--gradient-accent)", 
+                      width: "56px", 
+                      height: "56px", 
+                      borderRadius: "50%", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      justifyContent: "center", 
+                      fontSize: "24px" 
+                    }}
+                  >
+                    🏦
+                  </div>
+                  <h3 style={{ marginBottom: "16px", fontSize: "22px", color: "var(--text-primary)" }}>Authorize {kind === "deposit" ? "Deposit" : "Withdrawal"}</h3>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "16px", marginBottom: "24px" }}>
+                    You are about to authorize a {kind} of <strong style={{ color: "var(--text-primary)", fontSize: "32px", fontWeight: "800", display: "block", marginTop: "12px" }}>${amount} USD</strong>
                   </p>
+                  {kind === "withdrawal" && (
+                    <div style={{ marginBottom: "24px", textAlign: "left" }}>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "var(--text-secondary)" }}>
+                        Receive funds to UPI ID (Virtual Payment Address):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="username@stellarbank"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          borderRadius: "12px",
+                          border: "1px solid var(--border-subtle)",
+                          background: "var(--bg-secondary)",
+                          color: "var(--text-primary)",
+                          fontSize: "16px",
+                          outline: "none"
+                        }}
+                      />
+                    </div>
+                  )}
                   <div style={{ display: "flex", gap: "12px" }}>
                     <button
                       onClick={handleGoHome}
@@ -548,8 +644,8 @@ function InteractivePortalContent() {
                 </div>
               ) : (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <h3 style={{ marginBottom: "16px", fontSize: "18px", color: "#fff" }}>Ready to Transact?</h3>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px", marginBottom: "24px" }}>
+                  <h3 style={{ marginBottom: "16px", fontSize: "18px", color: "var(--text-primary)" }}>Ready to Transact?</h3>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "24px" }}>
                     Scan a transaction QR code from your desktop wallet to instantly authorize a deposit or withdrawal.
                   </p>
                   
@@ -579,19 +675,19 @@ function InteractivePortalContent() {
 
           {activeTab === 'history' && (
             <div className="mobile-card" style={{ flex: 1 }}>
-              <h3 style={{ marginBottom: "16px", fontSize: "18px", color: "#fff" }}>Recent Transactions</h3>
+              <h3 style={{ marginBottom: "16px", fontSize: "18px", color: "var(--text-primary)" }}>Recent Transactions</h3>
               {transactions.length === 0 ? (
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px", textAlign: "center", padding: "40px 0" }}>No transactions yet.</p>
+                <p style={{ color: "var(--text-muted)", fontSize: "14px", textAlign: "center", padding: "40px 0" }}>No transactions yet.</p>
               ) : (
                 <div className="bank-tx-list">
                   {transactions.map((tx, idx) => (
-                    <div key={idx} className="bank-tx-item" style={{ background: "rgba(255,255,255,0.05)", border: "none", marginBottom: "12px", padding: "16px" }}>
+                    <div key={idx} className="bank-tx-item" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-subtle)", marginBottom: "12px", padding: "16px" }}>
                       <div className="bank-tx-item-left">
                         <span className="bank-tx-item-type">{tx.type}</span>
                         <span className="bank-tx-item-date">{new Date(tx.timestamp).toLocaleString()}</span>
                       </div>
-                      <div className={`bank-tx-item-right ${tx.type === "deposit" ? "bank-tx-negative" : "bank-tx-positive"}`} style={{ fontSize: "16px" }}>
-                        {tx.type === "deposit" ? "-" : "+"}${tx.amount.toFixed(2)}
+                      <div className={`bank-tx-item-right ${tx.type.startsWith("DEBIT") ? "bank-tx-negative" : "bank-tx-positive"}`} style={{ fontSize: "16px" }}>
+                        {tx.type.startsWith("DEBIT") ? "-" : "+"}${tx.amount.toFixed(2)}
                       </div>
                     </div>
                   ))}

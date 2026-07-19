@@ -259,7 +259,7 @@ export default function BankDashboard() {
                 ) : (
                   <div className="tx-list" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     {transactions.map((tx) => {
-                      const isOutflow = tx.type.includes("OUTFLOW");
+                      const isOutflow = tx.type.includes("DEBIT");
                       return (
                         <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px" }}>
                           <div>
