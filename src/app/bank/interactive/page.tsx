@@ -325,7 +325,7 @@ function InteractivePortalContent() {
         </div>
       ) : (
         <>
-          <div className="mobile-header" style={{ paddingTop: "20px" }}>
+          <div className="mobile-header" style={{ paddingTop: "20px", maxWidth: "600px", margin: "0 auto", width: "100%" }}>
             <div className="mobile-header-user">
               <div className="mobile-avatar">
                 {loggedInAccount.name.charAt(0).toUpperCase()}
@@ -337,7 +337,7 @@ function InteractivePortalContent() {
             </div>
           </div>
 
-          <div className="mobile-balance-section" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginTop: "16px", marginBottom: "8px" }}>
+          <div className="mobile-balance-section" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginTop: "16px", marginBottom: "8px", maxWidth: "600px", margin: "16px auto 8px", width: "100%" }}>
             <div className="mobile-balance-label" style={{ color: "var(--text-secondary)", fontSize: "14px", fontWeight: "600" }}>Available Balance</div>
             <div className="mobile-balance-amount" style={{ color: "var(--text-primary)", fontSize: "40px", fontWeight: "800", margin: "4px 0" }}>${bankBalance.toFixed(2)}</div>
             
@@ -381,13 +381,13 @@ function InteractivePortalContent() {
           </div>
 
           {errorMsg && (
-            <div className="form-error" style={{ margin: "0 24px 16px" }}>
+            <div className="form-error" style={{ margin: "0 auto 16px", maxWidth: "600px", width: "calc(100% - 48px)" }}>
               {errorMsg}
             </div>
           )}
 
           {activeTab === 'action' && (
-            <div className="mobile-card">
+            <div className="mobile-card" style={{ maxWidth: "600px", margin: "0 auto 24px" }}>
               {status === "ready" ? (
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
                   <div 
@@ -460,11 +460,11 @@ function InteractivePortalContent() {
                   </p>
                   
                   {isScanning ? (
-                    <div style={{ background: "white", padding: "16px", borderRadius: "16px", color: "black" }}>
-                      <div id="qr-reader" style={{ width: "100%" }}></div>
+                    <div style={{ background: "white", padding: "16px", borderRadius: "16px", color: "black", maxWidth: "420px", margin: "0 auto", border: "1px solid rgba(0,0,0,0.1)", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
+                      <div id="qr-reader" style={{ width: "100%", overflow: "hidden", borderRadius: "12px" }}></div>
                       <button 
                         onClick={() => setIsScanning(false)}
-                        style={{ marginTop: "16px", padding: "8px 16px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", width: "100%" }}
+                        style={{ marginTop: "16px", padding: "12px 16px", background: "#ef4444", color: "white", border: "none", borderRadius: "12px", width: "100%", fontSize: "15px", fontWeight: "600", cursor: "pointer", transition: "all 0.2s" }}
                       >
                         Cancel Scan
                       </button>
@@ -473,7 +473,7 @@ function InteractivePortalContent() {
                     <button
                       onClick={() => setIsScanning(true)}
                       className="btn btn-primary btn-full"
-                      style={{ padding: "16px", fontSize: "16px", borderRadius: "12px", background: "linear-gradient(135deg, #a855f7, #3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+                      style={{ padding: "16px", fontSize: "16px", borderRadius: "12px", background: "linear-gradient(135deg, #a855f7, #3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", maxWidth: "340px", margin: "0 auto" }}
                     >
                       <span style={{ fontSize: "20px" }}>📷</span> Scan QR Code to Send Money
                     </button>
@@ -484,7 +484,7 @@ function InteractivePortalContent() {
           )}
 
           {activeTab === 'history' && (
-            <div className="mobile-card" style={{ flex: 1 }}>
+            <div className="mobile-card" style={{ flex: 1, maxWidth: "600px", margin: "0 auto 24px" }}>
               <h3 style={{ marginBottom: "16px", fontSize: "18px", color: "var(--text-primary)" }}>Recent Transactions</h3>
               {transactions.length === 0 ? (
                 <p style={{ color: "var(--text-muted)", fontSize: "14px", textAlign: "center", padding: "40px 0" }}>No transactions yet.</p>
