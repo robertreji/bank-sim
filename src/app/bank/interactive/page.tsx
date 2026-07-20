@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 function InteractivePortalContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
 
@@ -11,13 +12,7 @@ function InteractivePortalContent() {
   const [kind, setKind] = useState("deposit");
   const [amount, setAmount] = useState("10.00");
 
-  const [accountId, setAccountId] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [initialBalance, setInitialBalance] = useState("1000");
-
   const [loggedInAccount, setLoggedInAccount] = useState<any>(null);
-  const [showRegister, setShowRegister] = useState(false);
 
   const [bankBalance, setBankBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -51,15 +46,19 @@ function InteractivePortalContent() {
       .catch((e) => console.warn("Failed to fetch local IP:", e));
   }, []);
 
-  // Load account from localStorage if exists
+  // Load account from localStorage if exists, redirect if not
   useEffect(() => {
     const stored = localStorage.getItem("stellarpay_bank_account");
     if (stored) {
       const acc = JSON.parse(stored);
       setLoggedInAccount(acc);
       fetchBalance(acc.accountId);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("redirectTo", "/bank/interactive");
+      router.push(`/bank/login?${params.toString()}`);
     }
-  }, []);
+  }, [router, searchParams]);
 
   const processScannedTransaction = async (txIdOrToken: string) => {
     if (!loggedInAccount) {
@@ -166,66 +165,6 @@ function InteractivePortalContent() {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
-    setErrorMsg("");
-    try {
-      const res = await fetch("/api/bank/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId,
-          password,
-          name,
-          initialBalance,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Registration failed");
-
-      // Auto login
-      const loginRes = await fetch("/api/bank/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountId, password }),
-      });
-      const loginData = await loginRes.json();
-      if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
-
-      localStorage.setItem("stellarpay_bank_account", JSON.stringify(loginData.account));
-      setLoggedInAccount(loginData.account);
-      setBankBalance(loginData.account.balance);
-      setStatus("idle");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to register account");
-      setStatus("error");
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
-    setErrorMsg("");
-    try {
-      const res = await fetch("/api/bank/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountId, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Invalid credentials");
-
-      localStorage.setItem("stellarpay_bank_account", JSON.stringify(data.account));
-      setLoggedInAccount(data.account);
-      setBankBalance(data.account.balance);
-      setStatus("idle");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Login failed");
-      setStatus("error");
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("stellarpay_bank_account");
     setLoggedInAccount(null);
@@ -275,139 +214,10 @@ function InteractivePortalContent() {
 
   if (!loggedInAccount) {
     return (
-      <div className="mobile-app-container" style={{ justifyContent: "center" }}>
-        <div className="mobile-card">
-          <div className="bank-header" style={{ marginBottom: "24px" }}>
-            <div className="bank-logo-icon">🏦</div>
-            <h2>Simulated Bank Portal</h2>
-            {token ? (
-              <p>Access your bank account to authorize the {kind} request.</p>
-            ) : (
-              <p>Access your dashboard or scan a transaction QR code.</p>
-            )}
-          </div>
-
-          {!token && (
-            <div style={{ marginBottom: "24px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "24px" }}>
-              {isScanning ? (
-                <div style={{ background: "white", padding: "16px", borderRadius: "16px", color: "black" }}>
-                  <div id="qr-reader" style={{ width: "100%" }}></div>
-                  <button 
-                    onClick={() => setIsScanning(false)}
-                    style={{ marginTop: "16px", padding: "8px 16px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", width: "100%" }}
-                  >
-                    Cancel Scan
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsScanning(true)}
-                  className="btn btn-primary btn-full"
-                  style={{ padding: "16px", fontSize: "16px", borderRadius: "12px", background: "linear-gradient(135deg, #a855f7, #3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-                >
-                  <span style={{ fontSize: "20px" }}>📷</span> Scan Transaction QR
-                </button>
-              )}
-            </div>
-          )}
-
-          {errorMsg && (
-            <div className="form-error" style={{ marginBottom: "16px" }}>
-              {errorMsg}
-            </div>
-          )}
-
-          {showRegister ? (
-            <form onSubmit={handleRegister} className="bank-form">
-              <div className="form-group">
-                <label>Account ID / Username</label>
-                <input
-                  type="text"
-                  placeholder="e.g. USER-12345"
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label>Full Name</label>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label>Starting Balance (USD)</label>
-                <input
-                  type="number"
-                  placeholder="1000"
-                  value={initialBalance}
-                  onChange={(e) => setInitialBalance(e.target.value)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <button type="submit" className="btn btn-primary btn-full" disabled={status === "loading"}>
-                {status === "loading" ? "Registering..." : "Create Bank Account"}
-              </button>
-              <p className="toggle-auth-text">
-                Already have an account?{" "}
-                <button type="button" onClick={() => setShowRegister(false)}>
-                  Login here
-                </button>
-              </p>
-            </form>
-          ) : (
-            <form onSubmit={handleLogin} className="bank-form">
-              <div className="form-group">
-                <label>Account ID</label>
-                <input
-                  type="text"
-                  placeholder="USER-12345"
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <button type="submit" className="btn btn-primary btn-full" disabled={status === "loading"}>
-                {status === "loading" ? "Logging in..." : "Login & Access Portal"}
-              </button>
-              <p className="toggle-auth-text">
-                Need an account?{" "}
-                <button type="button" onClick={() => setShowRegister(true)}>
-                  Create one now
-                </button>
-              </p>
-            </form>
-          )}
+      <div className="mobile-app-container" style={{ justifyContent: "center", alignItems: "center" }}>
+        <div className="mobile-card" style={{ width: "80%", maxWidth: "380px", padding: "32px", textAlign: "center" }}>
+          <div className="progress-spinner large-spinner" style={{ margin: "0 auto" }} />
+          <h3 className="loading-status" style={{ marginTop: "16px", color: "var(--text-secondary)" }}>Redirecting to Bank Login...</h3>
         </div>
       </div>
     );
