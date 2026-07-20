@@ -20,7 +20,7 @@ function BankLoginContent() {
   useEffect(() => {
     const stored = localStorage.getItem("stellarpay_bank_account");
     if (stored) {
-      const redirectTo = searchParams.get("redirectTo") || "/bank/dashboard";
+      const redirectTo = searchParams.get("redirectTo") || "/bank/interactive";
       const params = new URLSearchParams(searchParams.toString());
       params.delete("redirectTo");
       const dest = params.toString() ? `${redirectTo}?${params.toString()}` : redirectTo;
@@ -43,7 +43,7 @@ function BankLoginContent() {
 
       localStorage.setItem("stellarpay_bank_account", JSON.stringify(data.account));
       
-      const redirectTo = searchParams.get("redirectTo") || "/bank/dashboard";
+      const redirectTo = searchParams.get("redirectTo") || "/bank/interactive";
       const params = new URLSearchParams(searchParams.toString());
       params.delete("redirectTo");
       const dest = params.toString() ? `${redirectTo}?${params.toString()}` : redirectTo;
@@ -84,7 +84,7 @@ function BankLoginContent() {
 
       localStorage.setItem("stellarpay_bank_account", JSON.stringify(loginData.account));
       
-      const redirectTo = searchParams.get("redirectTo") || "/bank/dashboard";
+      const redirectTo = searchParams.get("redirectTo") || "/bank/interactive";
       const params = new URLSearchParams(searchParams.toString());
       params.delete("redirectTo");
       const dest = params.toString() ? `${redirectTo}?${params.toString()}` : redirectTo;

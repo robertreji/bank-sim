@@ -266,7 +266,7 @@ function InteractivePortalContent() {
             gap: "8px",
             transition: "all 0.2s"
           }}
-          title="Go to Bank Dashboard"
+          title="Go to Bank Home"
         >
           <span>🏠</span> Home
         </button>
