@@ -169,6 +169,7 @@ function InteractivePortalContent() {
     localStorage.removeItem("stellarpay_bank_account");
     setLoggedInAccount(null);
     setBankBalance(0);
+    router.push("/bank/login?redirectTo=/bank/interactive");
   };
 
   const handleAction = async () => {
