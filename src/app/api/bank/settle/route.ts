@@ -1,17 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function jsonResponse(data: any, status: number = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { transactionId, token, accountId, amount, kind } = body;
 
     if (!transactionId || !accountId || !amount || !kind) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return jsonResponse({ error: "Missing required fields" }, 400);
     }
 
     const amountVal = parseFloat(amount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+      return jsonResponse({ error: "Invalid amount" }, 400);
     }
 
     const anchorServiceUrl = process.env.ANCHOR_SERVICE_URL || "http://localhost:3003";
@@ -26,9 +48,9 @@ export async function POST(request: NextRequest) {
 
     if (!txDetailsRes.ok) {
       const errText = await txDetailsRes.text();
-      return NextResponse.json(
+      return jsonResponse(
         { error: `Failed to fetch transaction from Anchor Service: ${errText}` },
-        { status: 500 }
+        500
       );
     }
 
@@ -36,7 +58,7 @@ export async function POST(request: NextRequest) {
     const transaction = txData.transaction || txData;
     const asset =
       transaction.amount_expected?.asset ||
-      "stellar:USDC:GAJ553PWUPQDOJBP33JKEHXJXCGT5QTU7U245Y243MMQUA4QBQIJ55ND";
+      "stellar:USDC:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
 
     if (kind === "deposit") {
       // 2. Call Anchor Service to transition Platform status to pending_user_transfer_start
@@ -56,9 +78,9 @@ export async function POST(request: NextRequest) {
 
       if (!depositRes.ok) {
         const errText = await depositRes.text();
-        return NextResponse.json(
+        return jsonResponse(
           { error: `Anchor service deposit initialization failed: ${errText}` },
-          { status: 500 }
+          500
         );
       }
 
@@ -85,10 +107,10 @@ export async function POST(request: NextRequest) {
 
       if (!transferRes.ok) {
         const errData = await transferRes.json();
-        return NextResponse.json({ error: `Bank transfer failed: ${errData.error}` }, { status: 400 });
+        return jsonResponse({ error: `Bank transfer failed: ${errData.error}` }, 400);
       }
 
-      return NextResponse.json({
+      return jsonResponse({
         success: true,
         message: "Bank deposit authorized and processed! Webhook triggered.",
       });
@@ -111,21 +133,21 @@ export async function POST(request: NextRequest) {
 
       if (!withdrawRes.ok) {
         const errText = await withdrawRes.text();
-        return NextResponse.json(
+        return jsonResponse(
           { error: `Anchor service withdrawal initialization failed: ${errText}` },
-          { status: 500 }
+          500
         );
       }
 
-      return NextResponse.json({
+      return jsonResponse({
         success: true,
         message: "Bank withdrawal authorized! Waiting for user payment on-chain...",
       });
     }
 
-    return NextResponse.json({ error: "Invalid kind. Must be 'deposit' or 'withdrawal'" }, { status: 400 });
+    return jsonResponse({ error: "Invalid kind. Must be 'deposit' or 'withdrawal'" }, 400);
   } catch (error: any) {
     console.error("Bank settle API error:", error);
-    return NextResponse.json({ error: error.message || "Settlement failed" }, { status: 500 });
+    return jsonResponse({ error: error.message || "Settlement failed" }, 500);
   }
 }
